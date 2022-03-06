@@ -200,28 +200,28 @@ def main_worker(gpu, ngpus_per_node, args):
     cudnn.benchmark = True
 
     # Data loading code
-    traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val')
+    #traindir = os.path.join(args.data, 'train')
+    valdir = os.path.join(args.data, 'val/images')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
-    train_dataset = datasets.ImageFolder(
-        traindir,
-        transforms.Compose([
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ]))
+    #train_dataset = datasets.ImageFolder(
+    #    traindir,
+    #    transforms.Compose([
+    #        transforms.RandomResizedCrop(224),
+    #        transforms.RandomHorizontalFlip(),
+    #        transforms.ToTensor(),
+    #        normalize,
+    #    ]))
 
-    if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-    else:
-        train_sampler = None
+    #if args.distributed:
+    #    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    #else:
+    #    train_sampler = None
 
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
-        num_workers=args.workers, pin_memory=True, sampler=train_sampler)
+    #train_loader = torch.utils.data.DataLoader(
+    #    train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+    #    num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose([
@@ -237,30 +237,30 @@ def main_worker(gpu, ngpus_per_node, args):
         validate(val_loader, model, criterion, args)
         return
 
-    for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch, args)
+    #for epoch in range(args.start_epoch, args.epochs):
+    #    if args.distributed:
+    #        train_sampler.set_epoch(epoch)
+    #    adjust_learning_rate(optimizer, epoch, args)
 
-        # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch, args)
+    #    # train for one epoch
+    #    train(train_loader, model, criterion, optimizer, epoch, args)
 
-        # evaluate on validation set
-        acc1 = validate(val_loader, model, criterion, args)
+    #    # evaluate on validation set
+    #    acc1 = validate(val_loader, model, criterion, args)
 
-        # remember best acc@1 and save checkpoint
-        is_best = acc1 > best_acc1
-        best_acc1 = max(acc1, best_acc1)
+    #    # remember best acc@1 and save checkpoint
+    #    is_best = acc1 > best_acc1
+    #    best_acc1 = max(acc1, best_acc1)
 
-        if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-                and args.rank % ngpus_per_node == 0):
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'arch': args.arch,
-                'state_dict': model.state_dict(),
-                'best_acc1': best_acc1,
-                'optimizer' : optimizer.state_dict(),
-            }, is_best)
+    #    if not args.multiprocessing_distributed or (args.multiprocessing_distributed
+    #            and args.rank % ngpus_per_node == 0):
+    #        save_checkpoint({
+    #            'epoch': epoch + 1,
+    #            'arch': args.arch,
+    #            'state_dict': model.state_dict(),
+    #            'best_acc1': best_acc1,
+    #            'optimizer' : optimizer.state_dict(),
+    #        }, is_best)
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
@@ -393,7 +393,7 @@ class AverageMeter(object):
         if self.summary_type is Summary.NONE:
             fmtstr = ''
         elif self.summary_type is Summary.AVERAGE:
-            fmtstr = '{name} {avg:.3f}'
+            fmtstr = '{name} {avg:.4f}'
         elif self.summary_type is Summary.SUM:
             fmtstr = '{name} {sum:.3f}'
         elif self.summary_type is Summary.COUNT:
